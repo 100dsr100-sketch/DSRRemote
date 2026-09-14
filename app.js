@@ -215,7 +215,15 @@ function selectMonitor(index) {
    Mouse / touch -> input, via Pointer Events (unifies mouse+touch)
    ============================================================ */
 const imgScreen = $('imgScreen');
-imgScreen.addEventListener('contextmenu', (e) => e.preventDefault());
+const screenWrap = $('screenWrap');
+// Listeners live on the wrapper (the whole black area), not just the img
+// itself - fractionFromEvent still maps against the image's own actual
+// rect and clamps to it, but this way a tap that lands just outside the
+// image's exact box (e.g. from any future letterboxing/rounding) still
+// does something sensible at the nearest edge instead of silently doing
+// nothing, which is exactly what made mouse control seem dead entirely
+// when the image was mis-sized (see the 100dvh fix above).
+screenWrap.addEventListener('contextmenu', (e) => e.preventDefault());
 
 function fractionFromEvent(e) {
   const w = imgScreen.clientWidth, h = imgScreen.clientHeight;
@@ -232,8 +240,8 @@ function avgY() {
   return sum / activePointers.size;
 }
 
-imgScreen.addEventListener('pointerdown', (e) => {
-  imgScreen.setPointerCapture(e.pointerId);
+screenWrap.addEventListener('pointerdown', (e) => {
+  screenWrap.setPointerCapture(e.pointerId);
   activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   if (activePointers.size === 1) {
     scrollMode = false;
@@ -250,7 +258,7 @@ imgScreen.addEventListener('pointerdown', (e) => {
   }
 });
 
-imgScreen.addEventListener('pointermove', (e) => {
+screenWrap.addEventListener('pointermove', (e) => {
   if (!activePointers.has(e.pointerId)) return;
   activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   if (scrollMode && activePointers.size >= 2) {
@@ -279,8 +287,8 @@ function pointerEnd(e) {
     scrollMode = false;
   }
 }
-imgScreen.addEventListener('pointerup', pointerEnd);
-imgScreen.addEventListener('pointercancel', pointerEnd);
+screenWrap.addEventListener('pointerup', pointerEnd);
+screenWrap.addEventListener('pointercancel', pointerEnd);
 
 /* ============================================================
    Toolbar
