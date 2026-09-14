@@ -1,0 +1,15 @@
+{
+  "name": "DSR Remote",
+  "short_name": "DSR Remote",
+  "description": "Remote control your PC from a browser - screen view, mouse/keyboard, clipboard and file transfer.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

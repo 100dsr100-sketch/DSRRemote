@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>DSR Remote</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<style>
+  :root {
+    --gold: #D4AF37;
+    --gold-dim: #8C7526;
+    --black: #0A0A0A;
+    --panel: #161616;
+    --white: #F2F2F2;
+    --grey: #9A9A9A;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--black); color: var(--white);
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+  }
+  button {
+    background: none; border: none; color: var(--gold);
+    font-weight: bold; font-size: 14px; cursor: pointer;
+    padding: 8px 10px;
+  }
+  button:hover { color: var(--white); }
+  button:disabled { color: #444; cursor: default; }
+  input[type=text], input[type=number] {
+    background: var(--black); border: none; border-bottom: 1px solid var(--gold-dim);
+    color: var(--white); font-size: 16px; padding: 8px 4px; width: 100%;
+  }
+  label.field-label {
+    color: var(--gold-dim); font-size: 11px; letter-spacing: 0.05em;
+    text-transform: uppercase; display: block; margin-top: 16px;
+  }
+
+  /* ---------------- Pairing screen ---------------- */
+  #pairScreen {
+    max-width: 420px; margin: 0 auto; padding: 32px 24px;
+    display: flex; flex-direction: column; height: 100%; justify-content: center;
+  }
+  #pairScreen h1 { color: var(--gold); font-size: 28px; margin: 0 0 2px; }
+  #pairScreen .subtitle { color: var(--grey); font-size: 14px; margin-bottom: 8px; }
+  #pairScreen button.primary {
+    background: var(--gold); color: var(--black); border-radius: 24px;
+    padding: 14px; margin-top: 24px; font-size: 15px;
+  }
+  #pairStatus { color: var(--grey); font-size: 13px; margin-top: 14px; min-height: 18px; }
+
+  /* ---------------- Remote screen ---------------- */
+  #remoteScreen { display: none; height: 100%; flex-direction: column; }
+  #topBar, #bottomBar {
+    background: var(--panel); display: flex; align-items: center;
+    padding: 4px 8px; flex-shrink: 0; flex-wrap: wrap;
+  }
+  #lblStatus { flex: 1; color: var(--gold); font-size: 13px; padding: 8px 4px; }
+  #screenWrap {
+    flex: 1; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--black); touch-action: none; cursor: crosshair;
+  }
+  #imgScreen { max-width: 100%; max-height: 100%; -webkit-user-drag: none; user-select: none; }
+  #lblWaiting { color: var(--grey); position: absolute; }
+  #keyRow {
+    display: none; background: var(--panel); overflow-x: auto; white-space: nowrap;
+    flex-shrink: 0;
+  }
+  #keyRow button { display: inline-block; font-size: 12px; padding: 8px 10px; }
+  #hiddenInput {
+    position: absolute; opacity: 0.01; width: 1px; height: 1px; top: 0; left: 0;
+  }
+  #bottomBar button { flex: 1; min-width: 70px; }
+
+  dialog {
+    background: var(--panel); color: var(--white); border: 1px solid var(--gold-dim);
+    border-radius: 8px; padding: 0; min-width: 260px;
+  }
+  dialog::backdrop { background: rgba(0,0,0,0.6); }
+  dialog h3 { color: var(--gold); margin: 0; padding: 16px 16px 8px; font-size: 16px; }
+  dialog .opt {
+    display: block; width: 100%; text-align: left; padding: 12px 16px;
+    color: var(--white); font-weight: normal; font-size: 14px;
+  }
+  dialog .opt:hover { background: #222; }
+  dialog .opt .sub { color: var(--grey); font-size: 12px; }
+  dialog .close-row { padding: 8px 16px 16px; text-align: right; }
+</style>
+</head>
+<body>
+
+<div id="pairScreen">
+  <h1>DSR Remote</h1>
+  <div class="subtitle">Control your PC from a browser</div>
+
+  <label class="field-label">Relay host</label>
+  <input type="text" id="editRelayHost" value="dsr-remote-relay.100dsr100.workers.dev">
+
+  <label class="field-label">Pairing token</label>
+  <input type="text" id="editToken" placeholder="Same token as the PC host">
+
+  <button class="primary" id="btnConnect">Connect</button>
+  <div id="pairStatus"></div>
+</div>
+
+<div id="remoteScreen">
+  <div id="topBar">
+    <span id="lblStatus">Connecting…</span>
+    <button id="btnQuality">Quality</button>
+    <button id="btnMonitor">Monitor</button>
+    <button id="btnDisconnect">Disconnect</button>
+  </div>
+
+  <div id="keyRow"></div>
+
+  <div id="screenWrap">
+    <img id="imgScreen" alt="Remote screen">
+    <span id="lblWaiting">Waiting for the PC to start streaming…</span>
+  </div>
+
+  <input type="text" id="hiddenInput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+
+  <div id="bottomBar">
+    <button id="btnKeyboard">Keyboard</button>
+    <button id="btnClipboard">Clipboard</button>
+    <button id="btnSendFile">Send file</button>
+    <button id="btnRightClick">Right-click</button>
+  </div>
+  <input type="file" id="fileInput" style="display:none">
+</div>
+
+<dialog id="monitorDialog"><h3>Monitor</h3><div id="monitorList"></div><div class="close-row"><button onclick="monitorDialog.close()">Cancel</button></div></dialog>
+<dialog id="qualityDialog">
+  <h3>Quality</h3>
+  <div id="qualityList">
+    <button class="opt" data-preset="0"><b>High speed (video)</b><br><span class="sub">20 fps · full quality · full colour</span></button>
+    <button class="opt" data-preset="1"><b>Balanced</b><br><span class="sub">8 fps · good quality · full colour</span></button>
+    <button class="opt" data-preset="2"><b>Data saver</b><br><span class="sub">6 fps · reduced quality · 60% resolution</span></button>
+    <button class="opt" data-preset="3"><b>Minimal (black &amp; white)</b><br><span class="sub">4 fps · 50% resolution · no colour</span></button>
+  </div>
+  <div class="close-row"><button onclick="qualityDialog.close()">Cancel</button></div>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
