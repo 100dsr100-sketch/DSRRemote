@@ -1,0 +1,8 @@
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+
+# wrangler local dev state / caches
+worker/.wrangler/
+node_modules/
