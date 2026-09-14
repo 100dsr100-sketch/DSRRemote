@@ -117,10 +117,17 @@
   <div class="subtitle">Control your PC from a browser</div>
 
   <label class="field-label">Relay host</label>
-  <input type="text" id="editRelayHost" value="dsr-remote-relay.100dsr100.workers.dev">
+  <input type="text" id="editRelayHost" value="dsr-remote-relay.100dsr100.workers.dev"
+         autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false">
 
-  <label class="field-label">Pairing token</label>
-  <input type="text" id="editToken" placeholder="Same token as the PC host">
+  <!-- autocapitalize/autocorrect off is not cosmetic here - a phone
+       keyboard silently capitalizing the first character (a very common
+       default) produces a token that LOOKS the same but doesn't match
+       the PC's, landing this device alone in an empty room. Confirmed
+       live: this is what "connects fine, never hears from the PC" turned
+       out to be. -->
+  <input type="text" id="editToken" placeholder="Same token as the PC host"
+         autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false">
 
   <button class="primary" id="btnConnect">Connect</button>
   <div id="pairStatus"></div>
