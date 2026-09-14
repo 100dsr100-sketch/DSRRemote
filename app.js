@@ -88,11 +88,28 @@ const $ = (id) => document.getElementById(id);
 $('editRelayHost').value = localStorage.getItem(LS_RELAY) || DEFAULT_RELAY_HOST;
 $('editToken').value = localStorage.getItem(LS_TOKEN) || '';
 
+// These fields are almost always "paste/type a whole new value over
+// whatever's here", not edited in place - select-on-focus means doing
+// that just works, instead of a stray click leaving the cursor mid-field
+// and a paste/typed token silently concatenating onto the old one (which
+// looks exactly like a connection hang, since the relay just rejects the
+// resulting >128-char token with nothing to see in the UI - confirmed the
+// hard way while testing this very page).
+for (const el of [$('editRelayHost'), $('editToken')]) {
+  el.addEventListener('focus', () => el.select());
+}
+
+const TOKEN_RE = /^[A-Za-z0-9_-]{16,128}$/;
+
 $('btnConnect').addEventListener('click', () => {
   const host = $('editRelayHost').value.trim();
   const token = $('editToken').value.trim();
   if (!token) {
     $('pairStatus').textContent = 'Enter a pairing token first.';
+    return;
+  }
+  if (!TOKEN_RE.test(token)) {
+    $('pairStatus').textContent = 'That token doesn’t look right (16-128 letters/digits/-/_) - check for leftover text from a previous token.';
     return;
   }
   localStorage.setItem(LS_RELAY, host);
