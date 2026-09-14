@@ -180,6 +180,7 @@ function handleBinary(buf) {
     const url = URL.createObjectURL(blob);
     const prev = lastFrameUrl;
     $('imgScreen').src = url;
+    $('imgScreen').style.display = 'block';
     lastFrameUrl = url;
     if (prev) URL.revokeObjectURL(prev);
     $('lblWaiting').style.display = 'none';

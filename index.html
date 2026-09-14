@@ -69,7 +69,10 @@
     display: flex; align-items: center; justify-content: center;
     background: var(--black); touch-action: none; cursor: crosshair;
   }
-  #imgScreen { max-width: 100%; max-height: 100%; -webkit-user-drag: none; user-select: none; }
+  /* No src is set until the first frame arrives - without this, the
+     browser's own broken-image glyph + alt text renders in the meantime
+     and visually collides with #lblWaiting. */
+  #imgScreen { max-width: 100%; max-height: 100%; -webkit-user-drag: none; user-select: none; display: none; }
   #lblWaiting { color: var(--grey); position: absolute; }
   #keyRow {
     display: none; background: var(--panel); overflow-x: auto; white-space: nowrap;
