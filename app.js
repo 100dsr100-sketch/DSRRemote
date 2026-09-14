@@ -171,9 +171,17 @@ function handleText(text) {
   switch (obj.type) {
     case 'monitors':
       monitors = obj.list || [];
-      if (selectedMonitor < 0 && monitors.length) {
-        const primary = monitors.find(m => m.primary) || monitors[0];
-        selectMonitor(primary.index);
+      // Always (re-)send select_monitor here, not just the first time -
+      // if the WebSocket drops and the reconnect timer brings it back,
+      // the PC host's own streamer has nothing running yet and is
+      // waiting to be told what to stream. Skipping this on a reconnect
+      // (only doing it once, ever) left the UI stuck on "Streaming" with
+      // no image and no way to recover short of restarting the PC app.
+      // Re-select whichever monitor was already chosen if it still
+      // exists, so a reconnect doesn't silently switch monitors on you.
+      if (monitors.length) {
+        const target = monitors.find(m => m.index === selectedMonitor) || monitors.find(m => m.primary) || monitors[0];
+        selectMonitor(target.index);
       }
       $('lblStatus').textContent = 'Streaming';
       break;
