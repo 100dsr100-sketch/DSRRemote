@@ -1,6 +1,6 @@
 {
   "name": "DSR Remote Web",
-  "short_name": "Remote Web",
+  "short_name": "DSR Remote Web",
   "description": "Remote control your PC from a browser - screen view, mouse/keyboard, clipboard and file transfer.",
   "start_url": ".",
   "scope": ".",
